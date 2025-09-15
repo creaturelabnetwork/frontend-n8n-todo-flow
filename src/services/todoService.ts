@@ -33,6 +33,7 @@ export const todoService = {
         },
         body: JSON.stringify({
           action: 'read',
+          todo: {}
         }),
       });
 
