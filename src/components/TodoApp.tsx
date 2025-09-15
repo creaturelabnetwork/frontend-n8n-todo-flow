@@ -19,10 +19,12 @@ export const TodoApp = () => {
 
   useEffect(() => {
     const loadTodos = async () => {
+      setIsLoadingTodos(true);
       try {
         const todosFromService = await todoService.readTodos();
         setTodos(todosFromService);
       } catch (error) {
+        console.error('Failed to load todos:', error);
         toast({
           variant: "destructive",
           title: "Error",
@@ -34,7 +36,7 @@ export const TodoApp = () => {
     };
 
     loadTodos();
-  }, [toast]);
+  }, []);
 
   const handleCreateTodo = async (e: React.FormEvent) => {
     e.preventDefault();
