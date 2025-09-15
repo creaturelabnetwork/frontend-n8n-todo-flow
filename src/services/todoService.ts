@@ -38,8 +38,12 @@ export const todoService = {
         throw new Error(`Read request failed with status: ${response.status}`);
       }
 
-      const todos = await response.json();
-      return Array.isArray(todos) ? todos : [];
+      const data = await response.json();
+      // Handle the nested structure: [{ "todos": [...] }]
+      if (Array.isArray(data) && data.length > 0 && data[0].todos) {
+        return data[0].todos;
+      }
+      return [];
     } catch (error) {
       console.error('Error reading todos:', error);
       throw error;

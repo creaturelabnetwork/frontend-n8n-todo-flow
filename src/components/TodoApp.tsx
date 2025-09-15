@@ -44,9 +44,11 @@ export const TodoApp = () => {
 
     setIsLoading(true);
     try {
-      const newTodo = await todoService.createTodo({ title: newTodoTitle.trim() });
-      setTodos(prev => [newTodo, ...prev]);
+      await todoService.createTodo({ title: newTodoTitle.trim() });
       setNewTodoTitle('');
+      // Refresh todos from API
+      const updatedTodos = await todoService.readTodos();
+      setTodos(updatedTodos);
       toast({
         title: "Todo created",
         description: "Your todo has been added successfully!",
@@ -63,21 +65,16 @@ export const TodoApp = () => {
   };
 
   const handleUpdateTodo = async (id: string, updates: Partial<Todo>) => {
-    setTodos(prev => prev.map(todo => 
-      todo.id === id ? { ...todo, ...updates, updatedAt: new Date() } : todo
-    ));
-
     try {
       await todoService.updateTodo({ id, ...updates });
+      // Refresh todos from API
+      const updatedTodos = await todoService.readTodos();
+      setTodos(updatedTodos);
       toast({
         title: "Todo updated",
         description: "Your changes have been saved!",
       });
     } catch (error) {
-      // Revert optimistic update
-      setTodos(prev => prev.map(todo => 
-        todo.id === id ? todos.find(t => t.id === id) || todo : todo
-      ));
       toast({
         variant: "destructive",
         title: "Error",
@@ -87,20 +84,16 @@ export const TodoApp = () => {
   };
 
   const handleDeleteTodo = async (id: string) => {
-    const todoToDelete = todos.find(t => t.id === id);
-    setTodos(prev => prev.filter(todo => todo.id !== id));
-
     try {
       await todoService.deleteTodo({ id });
+      // Refresh todos from API
+      const updatedTodos = await todoService.readTodos();
+      setTodos(updatedTodos);
       toast({
         title: "Todo deleted",
         description: "Your todo has been removed successfully!",
       });
     } catch (error) {
-      // Revert optimistic update
-      if (todoToDelete) {
-        setTodos(prev => [todoToDelete, ...prev]);
-      }
       toast({
         variant: "destructive",
         title: "Error",
