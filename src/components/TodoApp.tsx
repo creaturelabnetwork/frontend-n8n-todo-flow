@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, CheckCircle2, Circle, ListTodo } from 'lucide-react';
 import { Todo } from '@/types/todo';
 import { todoService } from '@/services/todoService';
@@ -13,8 +13,28 @@ export const TodoApp = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodoTitle, setNewTodoTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingTodos, setIsLoadingTodos] = useState(true);
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
   const { toast } = useToast();
+
+  useEffect(() => {
+    const loadTodos = async () => {
+      try {
+        const todosFromService = await todoService.readTodos();
+        setTodos(todosFromService);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load todos. Please refresh the page.",
+        });
+      } finally {
+        setIsLoadingTodos(false);
+      }
+    };
+
+    loadTodos();
+  }, [toast]);
 
   const handleCreateTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,7 +190,16 @@ export const TodoApp = () => {
 
         {/* Todo List */}
         <div className="space-y-3">
-          {filteredTodos.length === 0 ? (
+          {isLoadingTodos ? (
+            <Card className="p-8 text-center bg-gradient-card shadow-soft border border-border/50">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <ListTodo className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground text-lg">
+                Loading your todos...
+              </p>
+            </Card>
+          ) : filteredTodos.length === 0 ? (
             <Card className="p-8 text-center bg-gradient-card shadow-soft border border-border/50">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <ListTodo className="w-8 h-8 text-muted-foreground" />

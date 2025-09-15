@@ -22,6 +22,30 @@ const sendWebhook = async (payload: WebhookPayload): Promise<void> => {
 };
 
 export const todoService = {
+  async readTodos(): Promise<Todo[]> {
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'read',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Read request failed with status: ${response.status}`);
+      }
+
+      const todos = await response.json();
+      return Array.isArray(todos) ? todos : [];
+    } catch (error) {
+      console.error('Error reading todos:', error);
+      throw error;
+    }
+  },
+
   async createTodo(request: CreateTodoRequest): Promise<Todo> {
     const todo: Todo = {
       id: crypto.randomUUID(),
