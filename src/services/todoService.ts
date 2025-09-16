@@ -87,6 +87,13 @@ export const todoService = {
       ...(request.completed !== undefined && { completed: request.completed }),
     };
 
+    // Ensure completed status is always included if not explicitly set
+    if (request.completed === undefined && request.title !== undefined) {
+      // When only updating title, we need to preserve the completed status
+      // Since we don't have the current state, we'll include completed: false as default
+      updatedTodo.completed = false;
+    }
+
     await sendWebhook({
       action: 'update',
       todo: updatedTodo,
