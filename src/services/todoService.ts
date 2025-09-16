@@ -44,10 +44,11 @@ export const todoService = {
       const data = await response.json();
       console.log('Read response:', data);
       
-      // Handle the response structure: [{ "action": "read", "success": true, "todos": [...] }]
-      if (Array.isArray(data) && data.length > 0 && data[0].todos) {
-        const todos = data[0].todos.map((todo: any) => ({
+      // Handle the response structure: { "action": "read", "success": true, "todos": [...] }
+      if (data && data.todos) {
+        const todos = data.todos.map((todo: any) => ({
           ...todo,
+          title: String(todo.title), // Ensure title is always a string
           createdAt: new Date(todo.createdAt),
           updatedAt: new Date(todo.updatedAt),
         }));
