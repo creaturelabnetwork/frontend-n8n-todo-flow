@@ -66,7 +66,20 @@ export const TodoApp = () => {
 
   const handleUpdateTodo = async (id: string, updates: Partial<Todo>) => {
     try {
-      await todoService.updateTodo({ id, ...updates });
+      // Find the current todo to get all its properties
+      const currentTodo = todos.find(todo => todo.id === id);
+      if (!currentTodo) {
+        throw new Error('Todo not found');
+      }
+
+      // Always send both title and completed status
+      const updatePayload = {
+        id,
+        title: updates.title ?? currentTodo.title,
+        completed: updates.completed ?? currentTodo.completed,
+      };
+
+      await todoService.updateTodo(updatePayload);
       // Refresh todos from API
       const updatedTodos = await todoService.readTodos();
       setTodos(updatedTodos);
