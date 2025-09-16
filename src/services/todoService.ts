@@ -42,9 +42,17 @@ export const todoService = {
       }
 
       const data = await response.json();
-      // Handle the nested structure: [{ "todos": [...] }]
+      console.log('Read response:', data);
+      
+      // Handle the response structure: [{ "action": "read", "success": true, "todos": [...] }]
       if (Array.isArray(data) && data.length > 0 && data[0].todos) {
-        return data[0].todos;
+        const todos = data[0].todos.map((todo: any) => ({
+          ...todo,
+          createdAt: new Date(todo.createdAt),
+          updatedAt: new Date(todo.updatedAt),
+        }));
+        console.log('Parsed todos:', todos);
+        return todos;
       }
       return [];
     } catch (error) {
